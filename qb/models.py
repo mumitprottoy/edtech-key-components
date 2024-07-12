@@ -53,3 +53,5 @@ class Option(models.Model):
 class Explanation(models.Model):
     question = models.OneToOneField(Question, on_delete=models.CASCADE)
     text = models.TextField(default='Explanation Text')
+
+
