@@ -1,6 +1,4 @@
 from .models import (
-    AdmissionTest,
-    University,
     QuestionMetaData,
     Appearance,
     Question,
@@ -15,10 +13,6 @@ def get_passage(metadata: QuestionMetaData):
 def get_options(question: Question) -> list:
     return list(question.options.all())
 
-def get_renderable_package(metadata: QuestionMetaData, for_report=False) -> dict:
-    passage = get_passage(metadata)
-    for question in metadata.questions.all():
-        pass
 
 def get_all_universities_under_admission_test_list(admission_tests: list) -> list:
     universities = list()
