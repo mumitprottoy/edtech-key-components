@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     AdmissionTest,
-    QuestionMeta,
+    QuestionMetaData,
     Appearance,
     Passage,
     Question,
@@ -16,7 +16,7 @@ class AdmissionTestAdmin(admin.ModelAdmin):
 
 
 admin.site.register((
-    QuestionMeta,
+    QuestionMetaData,
     Appearance,
     Passage,
     Question,

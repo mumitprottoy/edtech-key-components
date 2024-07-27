@@ -1,8 +1,9 @@
+from django.contrib.auth.models import User
 from django.db import models
 from datetime import datetime
 
-# constants
-THIS_YEAR = datetime.today().year
+
+current_year = lambda: datetime.today().year
 
 
 class AdmissionTest(models.Model):
@@ -11,18 +12,40 @@ class AdmissionTest(models.Model):
     
     def __str__(self):
         return self.name
-    
 
-class QuestionMeta(models.Model):
+
+class University(models.Model):
+    admission_test = models.ForeignKey(
+        AdmissionTest, on_delete=models.CASCADE, default=1, related_name='universities')
+    name = models.CharField(max_length=100, unique=True)
+    acronym = models.CharField(max_length=20, unique=True)
+    
+    def __str__(self):
+        return self.name
+
+
+class Chapter(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+ 
+
+class QuestionMetaData(models.Model):
     has_appeared = models.BooleanField(default=False)
     has_passage = models.BooleanField(default=False)
+    chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE)
+    
+    def get_question_count(self):
+        return self.questions.count()
+    
+    @classmethod
+    def get_all_metadata_by_chapters(cls, chapters: list):
+        return cls.objects.filter(chapter__in=chapters)
 
 
 class Appearance(models.Model):
-    meta = models.OneToOneField(QuestionMeta, on_delete=models.CASCADE)
+    metadata = models.OneToOneField(QuestionMetaData, on_delete=models.CASCADE)
     YEAR_CHOICES = [(str(yr), str(yr)) 
-                    for yr in range(THIS_YEAR, THIS_YEAR-41, -1)]
-    admission_test = models.ForeignKey(AdmissionTest, on_delete=models.CASCADE)
+                    for yr in range(current_year(), current_year()-41, -1)]
+    university = models.ForeignKey(University, on_delete=models.CASCADE, default=1)
     unit = models.CharField(max_length=10)
     year = models.CharField(max_length=10, choices=YEAR_CHOICES)
     
@@ -31,21 +54,24 @@ class Appearance(models.Model):
 
 
 class Passage(models.Model):
-    meta = models.OneToOneField(QuestionMeta, on_delete=models.CASCADE)
+    metadata = models.OneToOneField(QuestionMetaData, on_delete=models.CASCADE)
     text = models.TextField(default='Passage Text')
 
 
 class Question(models.Model):
-    meta = models.ForeignKey(QuestionMeta, on_delete=models.CASCADE)
+    metadata = models.ForeignKey(
+        QuestionMetaData, on_delete=models.CASCADE, related_name='questions')
     text = models.TextField(default='Question Text')
     
     def get_correct_answer(self):
         for option in self.options.all():
-            if option.is_correct: return option
+            if option.is_correct: 
+                return option
 
 
 class Option(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='options')
+    question = models.ForeignKey(
+        Question, on_delete=models.CASCADE, related_name='options')
     text = models.TextField(default='Option Text')
     is_correct = models.BooleanField(default=False)
 
@@ -53,5 +79,3 @@ class Option(models.Model):
 class Explanation(models.Model):
     question = models.OneToOneField(Question, on_delete=models.CASCADE)
     text = models.TextField(default='Explanation Text')
-
-

@@ -31,7 +31,7 @@ class KeyGen:
 
 
     def transaction_id(self) -> str:
-        key = 'Yummy' + self.datetime_key()
+        key = 'EDTECH' + self.datetime_key()
         key += self.alphanumeric_key(4).upper()
         
         return key
